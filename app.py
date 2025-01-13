@@ -20,31 +20,25 @@ trigger_responses = {
     "thank you for your time": "Bye",
 }
 
-#This should also 
-# accept the endpoint 
-# manage queueing
-# Convert last request into a report on completion
+# This should also 
+#   accept the endpoint 
+#   manage queueing
+#   generate a report on completion
+#   send a slack message to internal channels?
 @app.route("/set", methods=["POST"])
 def set_context():
-    global trigger_responses, exit_phrases
-    
     data = request.get_json()
-    if 'exit_phrases' in data:
-        exit_phrases = data['exit_phrases']
-    
-    if 'trigger_responses' in data:
-        trigger_responses = data['trigger_responses']
-    
+    app.config["exit_phrases"] = data.get("exit_phrases", exit_phrases)
+    app.config["trigger_responses"] = data.get("trigger_responses", trigger_responses)
+
     return jsonify({"message": "Context updated successfully"}), 200
 
 @app.route("/answer", methods=["POST"])
 def voice():
     logger.info("debug> Received a call. Sending initial response.")
     response = VoiceResponse()
-
     gather = response.gather(input="speech", action="/process-speech", timeout=3)
     gather.say("Hi")
-
     return Response(str(response), mimetype="application/xml")
 
 def end_call(response):
@@ -55,7 +49,9 @@ def end_call(response):
 @app.route("/process-speech", methods=["POST"])
 def process_speech():
     """Process speech input and respond or loop back."""
-    global repeat_count
+    global repeat_count, exit_phrases, trigger_responses
+    exit_phrases = app.config.get("exit_phrases", exit_phrases)
+    trigger_responses = app.config.get("trigger_responses", trigger_responses)
 
     speech_result = request.form.get("SpeechResult", "").lower()
     logger.info(f"debug> Received speech input: {speech_result}")
