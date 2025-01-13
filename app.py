@@ -1,16 +1,65 @@
 import os
-from flask import Flask
+import logging
+from flask import Flask, Response, request
 from twilio.twiml.voice_response import VoiceResponse
 
 app = Flask(__name__)
 
-@app.route("/answer", methods=['GET', 'POST'])
+# Set up basic logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# This can be configured as a script
+trigger_responses = {
+    "full date of birth": "Sure it is 5 December 2001",
+    "Do you have hypertension": "No I do not",
+    "bye": "Bye",
+    "have a good day": "Bye",
+}
+
+exit_phrases = ["bye", "have a good day"]
+
+
+@app.route("/answer", methods=["POST"])
 def voice():
+    logger.info("debug> Received a call. Sending initial response.")
     response = VoiceResponse()
-    response.say('Hello world')
-    return str(response)
+
+    gather = response.gather(input="speech", action="/process-speech", timeout=5)
+    gather.say("Sure it is 5 December 2001")
+
+    return Response(str(response), mimetype="application/xml")
+
+
+@app.route("/process-speech", methods=["POST"])
+def process_speech():
+    """Process speech input and respond or loop back."""
+    speech_result = request.form.get("SpeechResult", "").lower()
+    logger.info(f"debug> Received speech input: {speech_result}")
+
+    response = VoiceResponse()
+
+    # Check for trigger phrases and respond
+    for trigger, reply in trigger_responses.items():
+        if trigger in speech_result:
+            logger.info(f"debug> Matched trigger phrase: '{trigger}' with response: '{reply}'")
+            response.say(reply)
+            if trigger in exit_phrases:
+                logger.info("debug> Exit phrase detected. Ending the call.")
+                response.hangup()
+                return Response(str(response), mimetype="application/xml")
+            break
+    else:
+        logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
+        response.say("Sorry, can you repeat that?")
+
+    logger.info("debug> Gathering speech input")
+    response.gather(input="speech", action="/process-speech", timeout=5)
+    
+    return Response(str(response), mimetype="application/xml")
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+    logger.info(f"debug> Starting server on port {port}")
     app.run(debug=True, host="0.0.0.0", port=port)
-    
