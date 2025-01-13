@@ -31,7 +31,7 @@ context = {
     "name":"Alice",
     "dob": "2001-12-05",
     "phone": "+14013005666",
-    "url": "https://demo-qa.100ms.ai/"
+    "url": "https://demo-qa.100ms.ai/",
 }
 
 # This should also
@@ -46,7 +46,7 @@ def set_context():
         return jsonify({"message": "Cannot update context while tester is busy"}), 400
     
     data = request.get_json()
-    for key, value in context:
+    for key, value in context.items():
         app.config[key] = data.get(key, value)
     app.config["status"] = "busy"
 
@@ -75,7 +75,7 @@ def make_call():
                 logger.info("debug> Filling login form")
                 page.fill("#org-name", "100ms-in")
                 page.fill("#password", "hmsai")
-                page.click("#login-submit")
+                page.click("#login button[type='submit']")
             time.sleep(2)
             submit_call_form(page)
 
@@ -95,7 +95,7 @@ def submit_call_form(page):
         for key in ["name", "dob", "phone"]:
             page.fill("#"+key, app.config.get(key, context[key]))
 
-        page.click("#make_call_submit")
+        page.click("button:has(+ .message)")
         logger.info("debug> Clicked make_call")
 
 
