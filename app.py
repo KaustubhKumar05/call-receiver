@@ -12,12 +12,15 @@ logger = logging.getLogger(__name__)
 # This can be configured as a script
 trigger_responses = {
     "full date of birth": "Sure it is 5 December 2001",
-    "do you have hypertension": "No I do not",
+    "do you have hyper tension": "No I do not",
+    "or both": "No I do not",
     "bye": "Bye",
     "have a good day": "Bye",
+    "have a great day": "Bye",
+    "thank you for your time": "Bye",
 }
 
-exit_phrases = ["bye", "have a good day"]
+exit_phrases = ["bye", "have a good day", "have a great day", "thank you for your time"]
 
 repeat_count = 0
 
@@ -59,8 +62,7 @@ def process_speech():
         logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
         if repeat_count < 2:
             response.say("Sorry, can you repeat that?")
-        else:
-            response.say("No I do not")
+        logger.info("debug> incrementing repeat count to", repeat_count + 1)
         repeat_count += 1
 
     logger.info("debug> Gathering speech input")
