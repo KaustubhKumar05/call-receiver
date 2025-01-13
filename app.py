@@ -18,10 +18,11 @@ trigger_responses = {
     "have a good day": "Bye",
     "have a great day": "Bye",
     "thank you for your time": "Bye",
+    "do you take medication for blood pressure": "No, nothing of that sort",
 }
 
-# This should also 
-#   accept the endpoint 
+# This should also
+#   accept the endpoint
 #   manage queueing
 #   generate a report on completion
 #   send a slack message to internal channels?
@@ -64,7 +65,9 @@ def process_speech():
 
     for trigger, reply in trigger_responses.items():
         if trigger in speech_result:
-            logger.info(f"debug> Matched trigger phrase: '{trigger}' with response: '{reply}'")
+            logger.info(
+                f"debug> Matched trigger phrase: '{trigger}' with response: '{reply}'"
+            )
             response.say(reply)
             if trigger in exit_phrases:
                 logger.info("debug> Exit phrase detected")
@@ -79,7 +82,7 @@ def process_speech():
 
     logger.info("debug> Gathering speech input")
     response.gather(input="speech", action="/process-speech", timeout=3)
-    
+
     return Response(str(response), mimetype="application/xml")
 
 
