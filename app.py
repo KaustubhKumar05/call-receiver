@@ -57,9 +57,8 @@ def set_context():
 
 def make_call():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # Set headless=True to run without GUI
-        context = browser.new_context()
-        page = context.new_page()
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
 
         target = app.config["url"]
         logger.info(f"debug> Navigating to {target}")
