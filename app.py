@@ -29,7 +29,8 @@ def voice():
     logger.info("debug> Received a call. Sending initial response.")
     response = VoiceResponse()
 
-    response.gather(input="speech", action="/process-speech", timeout=2)
+    gather = response.gather(input="speech", action="/process-speech", timeout=2)
+    gather.say("Hi")
 
     return Response(str(response), mimetype="application/xml")
 
