@@ -8,10 +8,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 repeat_count = 0
+# Should be set by a post request
 context = {}
 
 exit_phrases = ["bye", "have a good day", "have a great day", "thank you for your time"]
-# This can be configured as a script, should use values from the context
 trigger_responses = {
     "full date of birth": "Sure it is 5 December 2001",
     "do you have hyper tension": "No I do not have either",
@@ -63,7 +63,7 @@ def process_speech():
         logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
         if repeat_count < 2:
             response.say("I am not sure")
-        logger.info("debug> incrementing repeat count to", repeat_count + 1)
+        logger.info(f"debug> incrementing repeat count to {repeat_count + 1}")
         repeat_count += 1
 
     logger.info("debug> Gathering speech input")
