@@ -59,9 +59,9 @@ python app.py
 
 ## Flow:
 
-`/test` - sets the metadata in the app config and starts the UI navigation on a separate thread. The UI navigation triggers a call from the target website to the configured phone number
-`/answer` - accepts the phone call and hands off control to `/process-speech`
-`/process-speech` - maintains a loop where the bot listens to the caller, responds based on the `trigger_responses` and then starts listening again
+- `/test`:  sets the metadata in the app config and starts the UI navigation on a separate thread. The UI navigation triggers a call from the target website to the configured phone number
+- `/answer`:  accepts the phone call and hands off control to `/process-speech`
+- `/process-speech`:  maintains a loop where the bot listens to the caller, responds based on the `trigger_responses` and then starts listening again
 
 ## Todo
 
