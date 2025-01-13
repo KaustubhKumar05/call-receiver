@@ -29,7 +29,7 @@ def voice():
     logger.info("debug> Received a call. Sending initial response.")
     response = VoiceResponse()
 
-    gather = response.gather(input="speech", action="/process-speech", timeout=5)
+    gather = response.gather(input="speech", action="/process-speech", timeout=3)
     gather.say("Hi")
 
     return Response(str(response), mimetype="application/xml")
@@ -61,12 +61,12 @@ def process_speech():
     else:
         logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
         if repeat_count < 2:
-            response.say("Sorry, can you repeat that?")
+            response.say("I am not sure")
         logger.info("debug> incrementing repeat count to", repeat_count + 1)
         repeat_count += 1
 
     logger.info("debug> Gathering speech input")
-    response.gather(input="speech", action="/process-speech", timeout=5)
+    response.gather(input="speech", action="/process-speech", timeout=3)
     
     return Response(str(response), mimetype="application/xml")
 
