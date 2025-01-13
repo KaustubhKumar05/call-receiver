@@ -11,31 +11,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 repeat_count = 0
+trigger_responses = {
+    "full date of birth": "Sure it is 5 December 2001",
+    "do you have hyper tension": "No I do not have either",
+    "or both": "No I do not have either",
+    "bye": "Bye",
+    "have a good day": "Bye",
+    "have a great day": "Bye",
+    "thank you for your time": "Bye",
+    "do you take medication for blood pressure": "No, nothing of that sort",
+}
+exit_phrases = [
+    "bye",
+    "have a good day",
+    "have a great day",
+    "thank you for your time",
+]
+
+
 context = {
-    "exit_phrases": [
-        "bye",
-        "have a good day",
-        "have a great day",
-        "thank you for your time",
-    ],
-    "trigger_responses": {
-        "full date of birth": "Sure it is 5 December 2001",
-        "do you have hyper tension": "No I do not have either",
-        "or both": "No I do not have either",
-        "bye": "Bye",
-        "have a good day": "Bye",
-        "have a great day": "Bye",
-        "thank you for your time": "Bye",
-        "do you take medication for blood pressure": "No, nothing of that sort",
-    },
-    "name":"Alice",
+    "exit_phrases": exit_phrases,
+    "trigger_responses": trigger_responses,
+    "name": "Alice",
     "dob": "2001-12-05",
     "phone": "+14013005666",
     "url": "https://demo-qa.100ms.ai/",
 }
 
 # This should also
-#   accept the endpoint
 #   manage queueing
 #   generate a report on completion
 #   send a slack message to internal channels?
@@ -44,7 +47,7 @@ def set_context():
     tester_status = app.config.get("status", "available")
     if tester_status != "available":
         return jsonify({"message": "Cannot update context while tester is busy"}), 400
-    
+
     data = request.get_json()
     for key, value in context.items():
         app.config[key] = data.get(key, value)
@@ -54,6 +57,7 @@ def set_context():
     thread.start()
 
     return jsonify({"message": "Context updated successfully"}), 200
+
 
 def make_call():
     with sync_playwright() as p:
@@ -92,7 +96,7 @@ def submit_call_form(page):
         logger.info("debug> Filling make call form")
 
         for key in ["name", "dob", "phone"]:
-            page.fill("#"+key, app.config.get(key, context[key]))
+            page.fill("#" + key, app.config.get(key, context[key]))
 
         page.click("button:has(+ .message)")
         logger.info("debug> Clicked make_call")
@@ -106,10 +110,12 @@ def voice():
     gather.say("Hi")
     return Response(str(response), mimetype="application/xml")
 
+
 def end_call(response):
     logger.info("debug> Hanging up")
     response.hangup()
     return Response(str(response), mimetype="application/xml")
+
 
 @app.route("/process-speech", methods=["POST"])
 def process_speech():
