@@ -12,13 +12,14 @@ logger = logging.getLogger(__name__)
 # This can be configured as a script
 trigger_responses = {
     "full date of birth": "Sure it is 5 December 2001",
-    "Do you have hypertension": "No I do not",
+    "do you have hypertension": "No I do not",
     "bye": "Bye",
     "have a good day": "Bye",
 }
 
 exit_phrases = ["bye", "have a good day"]
 
+repeat_count = 0
 
 @app.route("/answer", methods=["POST"])
 def voice():
@@ -34,10 +35,15 @@ def voice():
 @app.route("/process-speech", methods=["POST"])
 def process_speech():
     """Process speech input and respond or loop back."""
+    global repeat_count
+
     speech_result = request.form.get("SpeechResult", "").lower()
     logger.info(f"debug> Received speech input: {speech_result}")
 
     response = VoiceResponse()
+
+    if repeat_count > 3:
+        response.hangup()
 
     # Check for trigger phrases and respond
     for trigger, reply in trigger_responses.items():
@@ -51,7 +57,11 @@ def process_speech():
             break
     else:
         logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
-        response.say("Sorry, can you repeat that?")
+        if repeat_count < 2:
+            response.say("Sorry, can you repeat that?")
+        else:
+            response.say("No I do not")
+        repeat_count += 1
 
     logger.info("debug> Gathering speech input")
     response.gather(input="speech", action="/process-speech", timeout=5)
