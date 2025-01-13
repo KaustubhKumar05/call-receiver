@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 # This can be configured as a script
 trigger_responses = {
     "full date of birth": "Sure it is 5 December 2001",
-    "do you have hyper tension": "No I do not",
-    "or both": "No I do not",
+    "do you have hyper tension": "No I do not have either",
+    "or both": "No I do not have either",
     "bye": "Bye",
     "have a good day": "Bye",
     "have a great day": "Bye",
@@ -29,8 +29,7 @@ def voice():
     logger.info("debug> Received a call. Sending initial response.")
     response = VoiceResponse()
 
-    gather = response.gather(input="speech", action="/process-speech", timeout=5)
-    gather.say("Sure it is 5 December 2001")
+    response.gather(input="speech", action="/process-speech", timeout=2)
 
     return Response(str(response), mimetype="application/xml")
 
@@ -66,7 +65,7 @@ def process_speech():
         repeat_count += 1
 
     logger.info("debug> Gathering speech input")
-    response.gather(input="speech", action="/process-speech", timeout=5)
+    response.gather(input="speech", action="/process-speech", timeout=2)
     
     return Response(str(response), mimetype="application/xml")
 
