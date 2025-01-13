@@ -2,23 +2,36 @@ import os
 import logging
 from flask import Flask, Response, request, jsonify
 from twilio.twiml.voice_response import VoiceResponse
+import threading
+import time
+from playwright.sync_api import sync_playwright
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 repeat_count = 0
-
-exit_phrases = ["bye", "have a good day", "have a great day", "thank you for your time"]
-trigger_responses = {
-    "full date of birth": "Sure it is 5 December 2001",
-    "do you have hyper tension": "No I do not have either",
-    "or both": "No I do not have either",
-    "bye": "Bye",
-    "have a good day": "Bye",
-    "have a great day": "Bye",
-    "thank you for your time": "Bye",
-    "do you take medication for blood pressure": "No, nothing of that sort",
+context = {
+    "exit_phrases": [
+        "bye",
+        "have a good day",
+        "have a great day",
+        "thank you for your time",
+    ],
+    "trigger_responses": {
+        "full date of birth": "Sure it is 5 December 2001",
+        "do you have hyper tension": "No I do not have either",
+        "or both": "No I do not have either",
+        "bye": "Bye",
+        "have a good day": "Bye",
+        "have a great day": "Bye",
+        "thank you for your time": "Bye",
+        "do you take medication for blood pressure": "No, nothing of that sort",
+    },
+    "name":"Alice",
+    "dob": "2001-12-05",
+    "phone": "+14013005666",
+    "url": "https://demo-qa.100ms.ai/"
 }
 
 # This should also
@@ -26,13 +39,65 @@ trigger_responses = {
 #   manage queueing
 #   generate a report on completion
 #   send a slack message to internal channels?
-@app.route("/set", methods=["POST"])
+@app.route("/test", methods=["POST"])
 def set_context():
+    tester_status = app.config.get("status", "available")
+    if tester_status != "available":
+        return jsonify({"message": "Cannot update context while tester is busy"}), 400
+    
     data = request.get_json()
-    app.config["exit_phrases"] = data.get("exit_phrases", exit_phrases)
-    app.config["trigger_responses"] = data.get("trigger_responses", trigger_responses)
+    for key, value in context:
+        app.config[key] = data.get(key, value)
+    app.config["status"] = "busy"
+
+    thread = threading.Thread(target=make_call)
+    thread.start()
 
     return jsonify({"message": "Context updated successfully"}), 200
+
+def make_call():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)  # Set headless=True to run without GUI
+        context = browser.new_context()
+        page = context.new_page()
+
+        target = app.config["url"]
+        logger.info(f"debug> Navigating to {target}")
+        page.goto(target)
+        time.sleep(2)
+
+        try:
+            # Check if elements for login are present
+            if (
+                page.locator("#org-name").is_visible()
+                and page.locator("#password").is_visible()
+            ):
+                logger.info("debug> Filling login form")
+                page.fill("#org-name", "100ms-in")
+                page.fill("#password", "hmsai")
+                page.click("#login-submit")
+            time.sleep(2)
+            submit_call_form(page)
+
+        except Exception as e:
+            logger.info(f"debug> Error interacting with the page: {e}")
+
+        logger.info("debug> Closing the browser in 10s")
+        time.sleep(10)
+        # Close browser
+        browser.close()
+
+
+def submit_call_form(page):
+    if page.locator("#name").is_visible() and page.locator("#dob").is_visible():
+        logger.info("debug> Filling make call form")
+
+        for key in ["name", "dob", "phone"]:
+            page.fill("#"+key, app.config.get(key, context[key]))
+
+        page.click("#make_call_submit")
+        logger.info("debug> Clicked make_call")
+
 
 @app.route("/answer", methods=["POST"])
 def voice():
