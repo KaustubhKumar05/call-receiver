@@ -29,7 +29,7 @@ def voice():
     logger.info("debug> Received a call. Sending initial response.")
     response = VoiceResponse()
 
-    gather = response.gather(input="speech", action="/process-speech", timeout=2)
+    gather = response.gather(input="speech", action="/process-speech", timeout=5)
     gather.say("Hi")
 
     return Response(str(response), mimetype="application/xml")
@@ -66,7 +66,7 @@ def process_speech():
         repeat_count += 1
 
     logger.info("debug> Gathering speech input")
-    response.gather(input="speech", action="/process-speech", timeout=2)
+    response.gather(input="speech", action="/process-speech", timeout=5)
     
     return Response(str(response), mimetype="application/xml")
 
