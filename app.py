@@ -4,12 +4,14 @@ from flask import Flask, Response, request
 from twilio.twiml.voice_response import VoiceResponse
 
 app = Flask(__name__)
-
-# Set up basic logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# This can be configured as a script
+repeat_count = 0
+context = {}
+
+exit_phrases = ["bye", "have a good day", "have a great day", "thank you for your time"]
+# This can be configured as a script, should use values from the context
 trigger_responses = {
     "full date of birth": "Sure it is 5 December 2001",
     "do you have hyper tension": "No I do not have either",
@@ -19,10 +21,6 @@ trigger_responses = {
     "have a great day": "Bye",
     "thank you for your time": "Bye",
 }
-
-exit_phrases = ["bye", "have a good day", "have a great day", "thank you for your time"]
-
-repeat_count = 0
 
 @app.route("/answer", methods=["POST"])
 def voice():
@@ -34,6 +32,10 @@ def voice():
 
     return Response(str(response), mimetype="application/xml")
 
+def end_call(response):
+    logger.info("debug> Hanging up")
+    response.hangup()
+    return Response(str(response), mimetype="application/xml")
 
 @app.route("/process-speech", methods=["POST"])
 def process_speech():
@@ -46,17 +48,16 @@ def process_speech():
     response = VoiceResponse()
 
     if repeat_count > 3:
-        response.hangup()
+        logger.info("debug> Repeat count limit reached")
+        return end_call(response)
 
-    # Check for trigger phrases and respond
     for trigger, reply in trigger_responses.items():
         if trigger in speech_result:
             logger.info(f"debug> Matched trigger phrase: '{trigger}' with response: '{reply}'")
             response.say(reply)
             if trigger in exit_phrases:
-                logger.info("debug> Exit phrase detected. Ending the call.")
-                response.hangup()
-                return Response(str(response), mimetype="application/xml")
+                logger.info("debug> Exit phrase detected")
+                return end_call(response)
             break
     else:
         logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
