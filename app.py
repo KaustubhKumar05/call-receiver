@@ -141,6 +141,7 @@ def process_speech():
             response.say(reply)
             if trigger in exit_phrases:
                 logger.info("debug> Exit phrase detected")
+                app.config["status"] = "available"
                 return end_call(response)
             break
     else:
