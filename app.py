@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, Response, request
+from flask import Flask, Response, request, jsonify
 from twilio.twiml.voice_response import VoiceResponse
 
 app = Flask(__name__)
@@ -8,8 +8,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 repeat_count = 0
-# Should be set by a post request
-context = {}
 
 exit_phrases = ["bye", "have a good day", "have a great day", "thank you for your time"]
 trigger_responses = {
@@ -21,6 +19,23 @@ trigger_responses = {
     "have a great day": "Bye",
     "thank you for your time": "Bye",
 }
+
+#This should also 
+# accept the endpoint 
+# manage queueing
+# Convert last request into a report on completion
+@app.route("/set", methods=["POST"])
+def set_context():
+    global trigger_responses, exit_phrases
+    
+    data = request.get_json()
+    if 'exit_phrases' in data:
+        exit_phrases = data['exit_phrases']
+    
+    if 'trigger_responses' in data:
+        trigger_responses = data['trigger_responses']
+    
+    return jsonify({"message": "Context updated successfully"}), 200
 
 @app.route("/answer", methods=["POST"])
 def voice():
@@ -63,7 +78,7 @@ def process_speech():
         logger.info("debug> No matching trigger phrase. Asking the bot to repeat.")
         if repeat_count < 2:
             response.say("I am not sure")
-        logger.info(f"debug> incrementing repeat count to {repeat_count + 1}")
+        logger.info(f"debug> Incrementing repeat count to {repeat_count + 1}")
         repeat_count += 1
 
     logger.info("debug> Gathering speech input")
