@@ -29,7 +29,9 @@ curl --location 'https://call-receiver.onrender.com/test' \
     "name": "Alice",
     "dob": "2001-12-05",
     "phone": <twilio phone number>,
-    "url": "https://demo-qa.100ms.ai/"
+    "url": "https://demo-qa.100ms.ai/",
+    "org_name": "100ms-in",
+    "password": "hmsai"
 }'
 
 ```
@@ -65,7 +67,7 @@ python app.py
 
 ## Todo
 
-- Queueing
 - Transcript verification
+- Queueing?
 - Test reports?
 - Slack notifs in case of failures?

@@ -36,6 +36,8 @@ context = {
     "dob": "2001-12-05",
     "phone": "+14013005666",
     "url": "https://demo-qa.100ms.ai/",
+    "org_name": "100ms-in",
+    "password": "hmsai"
 }
 
 # This should also
@@ -76,8 +78,8 @@ def make_call():
                 and page.locator("#password").is_visible()
             ):
                 logger.info("debug> Filling login form")
-                page.fill("#org-name", "100ms-in")
-                page.fill("#password", "hmsai")
+                page.fill("#org-name", app.config.get("org_name", context["org_name"]))
+                page.fill("#password", app.config.get("password", context["password"]))
                 page.click("#login button[type='submit']")
             time.sleep(2)
             submit_call_form(page)
