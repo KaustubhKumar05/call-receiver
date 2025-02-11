@@ -95,14 +95,28 @@ def make_call():
 
 
 def submit_call_form(page):
-    if page.locator("#name").is_visible() and page.locator("#dob").is_visible():
-        logger.info("debug> Filling make call form")
+    global context
 
-        for key in ["name", "dob", "phone"]:
-            page.fill("#" + key, app.config.get(key, context[key]))
+    match context['org_name']:
+        case '100ms-in':
+            if page.locator("#name").is_visible() and page.locator("#dob").is_visible():
+                logger.info("debug> Filling make call form")
 
-        page.click("button:has(+ .message)")
-        logger.info("debug> Clicked make_call")
+                for key in ["name", "dob", "phone"]:
+                    page.fill("#" + key, app.config.get(key, context[key]))
+
+                page.click("button:has(+ .message)")
+                logger.info("debug> Clicked make_call")
+        
+        case 'mercalis':
+            logger.info("debug> Filling make call form for mercalis")
+            for key, value in app.config.items():
+                page.fill("#" + key, app.config.get(key, context[key]))
+
+            page.click("button:has(+ .message)")
+            logger.info("debug> Clicked make_call")
+        
+
 
 
 @app.route("/answer", methods=["POST"])
