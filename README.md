@@ -23,9 +23,9 @@ curl --location 'https://call-receiver.onrender.com/test' \
         "full date of birth": "Sure it is 5 December 2001",
         "do you have hyper tension": "No I do not have either",
         "or both": "No I do not have either",
-        "do you take medication for blood pressure": "No, nothing of that sort"
+        "do you take medication for blood pressure": "No, nothing of that sort",
         "have a great day": "Bye",
-        "thank you for your time": "Bye",
+        "thank you for your time": "Bye"
     },
     "name": "Alice",
     "dob": "2001-12-05",
