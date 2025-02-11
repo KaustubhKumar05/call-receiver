@@ -111,7 +111,8 @@ def submit_call_form(page):
         case 'mercalis':
             logger.info("debug> Filling make call form for mercalis")
             for key, value in app.config.items():
-                page.fill("#" + key, app.config.get(key, context[key]))
+                if page.locator("#" + key).is_visible():
+                    page.fill("#" + key, app.config.get(key, value))
 
             page.click("button:has(+ .message)")
             logger.info("debug> Clicked make_call")
