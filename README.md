@@ -12,6 +12,7 @@ Sample curl:
 curl --location 'https://call-receiver.onrender.com/test' \
 --header 'Content-Type: application/json' \
 --data '{
+    "greeting": "Hi",
     "exit_phrases": [
         "bye",
         "have a good day",

@@ -27,9 +27,10 @@ exit_phrases = [
     "have a great day",
     "thank you for your time",
 ]
-
+greeting = "Hi"
 
 context = {
+    "greeting": greeting,
     "exit_phrases": exit_phrases,
     "trigger_responses": trigger_responses,
     "name": "Alice",
@@ -40,7 +41,7 @@ context = {
     "password": "hmsai"
 }
 
-# This should also
+# This should also:
 #   manage queueing
 #   generate a report on completion
 #   send a slack message to internal channels?
@@ -106,10 +107,12 @@ def submit_call_form(page):
 
 @app.route("/answer", methods=["POST"])
 def voice():
+    global greeting
     logger.info("debug> Received a call. Sending initial response.")
+    greeting = app.config.get("greeting", greeting)
     response = VoiceResponse()
     gather = response.gather(input="speech", action="/process-speech", timeout=3)
-    gather.say("Hi")
+    gather.say(greeting)
     return Response(str(response), mimetype="application/xml")
 
 
