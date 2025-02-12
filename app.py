@@ -81,7 +81,7 @@ def make_call():
                 logger.info("debug> Filling login form")
                 page.fill("#org-name", app.config.get("org_name", context["org_name"]))
                 page.fill("#password", app.config.get("password", context["password"]))
-                page.click("#login button[type='submit']")
+                page.click("#login")
             time.sleep(2)
             submit_call_form(page)
 
