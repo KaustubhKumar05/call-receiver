@@ -126,7 +126,7 @@ def voice():
     logger.info("debug> Received a call. Sending initial response.")
     greeting = app.config.get("greeting", greeting)
     response = VoiceResponse()
-    gather = response.gather(input="speech", action="/process-speech", timeout=3)
+    gather = response.gather(input="speech", action="/process-speech", timeout=0)
     gather.say(greeting)
     return Response(str(response), mimetype="application/xml")
 
@@ -140,6 +140,7 @@ def end_call(response):
 @app.route("/process-speech", methods=["POST"])
 def process_speech():
     """Process speech input and respond or loop back."""
+    print("processing>")
     global repeat_count, exit_phrases, trigger_responses
     exit_phrases = app.config.get("exit_phrases", exit_phrases)
     trigger_responses = app.config.get("trigger_responses", trigger_responses)
