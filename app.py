@@ -27,18 +27,18 @@ exit_phrases = [
     "have a great day",
     "thank you for your time",
 ]
-greeting = "Hi"
+greeting = "Welcome to express scripts, how may I help you?"
 
 context = {
     "greeting": greeting,
     "exit_phrases": exit_phrases,
     "trigger_responses": trigger_responses,
-    "name": "Alice",
+    "patient-name": "Alice",
     "dob": "2001-12-05",
     "phone": "+14013005666",
-    "url": "https://demo-qa.100ms.ai/",
-    "org_name": "100ms-in",
-    "password": "hmsai"
+    "url": "https://demo-mercalis-agent.100ms.ai/",
+    "org_name": "mercalis",
+    "password": "hmsai",
 }
 
 # This should also:
@@ -90,15 +90,16 @@ def make_call():
 
         logger.info("debug> Closing the browser in 10s")
         time.sleep(10)
+        app.config["status"] = "available"
         # Close browser
-        browser.close()
+        # browser.close()
 
 
 def submit_call_form(page):
     global context
 
-    match context['org_name']:
-        case '100ms-in':
+    match context["org_name"]:
+        case "100ms-in":
             if page.locator("#name").is_visible() and page.locator("#dob").is_visible():
                 logger.info("debug> Filling make call form")
 
@@ -107,17 +108,16 @@ def submit_call_form(page):
 
                 page.click("button:has(+ .message)")
                 logger.info("debug> Clicked make_call")
-        
-        case 'mercalis':
+
+        case "mercalis":
             logger.info("debug> Filling make call form for mercalis")
+            print("config: ", app.config.items())
             for key, value in app.config.items():
                 if page.locator("#" + key).is_visible():
                     page.fill("#" + key, app.config.get(key, value))
 
             page.click("button:has(+ .message)")
             logger.info("debug> Clicked make_call")
-        
-
 
 
 @app.route("/answer", methods=["POST"])
