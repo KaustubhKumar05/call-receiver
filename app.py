@@ -126,8 +126,8 @@ def voice():
     logger.info("debug> Received a call. Sending initial response.")
     greeting = app.config.get("greeting", greeting)
     response = VoiceResponse()
-    gather = response.gather(input="speech", action="/process-speech", timeout=0)
-    gather.say(greeting)
+    response.say(greeting)
+    response.gather(input="speech", action="/process-speech", timeout=3)
     return Response(str(response), mimetype="application/xml")
 
 
