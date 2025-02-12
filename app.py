@@ -125,17 +125,17 @@ def voice():
     """Handles the initial call response, speaking the greeting first."""
     logger.info("debug> Received a call. Sending initial greeting.")
 
-    greeting = app.config.get("greeting", "Welcome to express scripts, how may I help you?")
-    
+    greeting = app.config.get("greeting", "Welcome to Express Scripts, how may I help you?")
+
     response = VoiceResponse()
     response.say(greeting)
-    
+    response.pause(length=1)  # Pause to ensure the greeting is heard fully
+
+    response.redirect("/process-speech")
     logger.info(f"debug> Spoken greeting: {greeting}")
 
-    # Gather speech input with a fallback message if no response
-    response.gather(input="speech", action="/process-speech", timeout=3)
-    
     return Response(str(response), mimetype="application/xml")
+
 
 
 def end_call(response):
