@@ -122,12 +122,19 @@ def submit_call_form(page):
 
 @app.route("/answer", methods=["POST"])
 def voice():
-    global greeting
-    logger.info("debug> Received a call. Sending initial response.")
-    greeting = app.config.get("greeting", greeting)
+    """Handles the initial call response, speaking the greeting first."""
+    logger.info("debug> Received a call. Sending initial greeting.")
+
+    greeting = app.config.get("greeting", "Welcome to express scripts, how may I help you?")
+    
     response = VoiceResponse()
     response.say(greeting)
+    
+    logger.info(f"debug> Spoken greeting: {greeting}")
+
+    # Gather speech input with a fallback message if no response
     response.gather(input="speech", action="/process-speech", timeout=3)
+    
     return Response(str(response), mimetype="application/xml")
 
 
